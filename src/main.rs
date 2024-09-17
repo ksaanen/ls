@@ -1,3 +1,6 @@
+extern crate colored;
+
+use colored::*;
 use std::fs::ReadDir;
 use std::io::Result;
 
@@ -16,7 +19,14 @@ fn read_current_dir() -> Result<ReadDir> {
 fn print_files(files: ReadDir) {
     for file in files {
         if let Ok(file) = file {
-            println!("{}", file.path().display());
+            if file.file_type().unwrap().is_dir() {
+                println!(
+                    "{}",
+                    file.path().display().to_string().truecolor(210, 168, 255)
+                );
+            } else {
+                println!("{}", file.path().display());
+            }
         }
     }
 }
