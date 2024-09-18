@@ -1,6 +1,3 @@
-extern crate colored;
-
-use colored::*;
 use std::fs::{DirEntry, ReadDir};
 use std::io::Result;
 
@@ -28,42 +25,20 @@ fn main() {
 
     let files = read_current_dir();
     match files {
-        Ok(files) => print_files(files, &config),
-        Err(_) => println!("Error reading directory"),
+        Ok(files) => {
+            for file in files {
+                if let Ok(file) = file {
+                    read_entry(file, &config);
+                }
+            }
+            print!("\n")
+        }
+        Err(_) => {}
     }
 }
 
 fn read_current_dir() -> Result<ReadDir> {
     std::fs::read_dir(".")
-}
-
-fn print_files(files: ReadDir, config: &Config) {
-    for file in files {
-        if let Ok(file) = file {
-            if is_hidden(&file) && !config.all {
-                continue;
-            }
-            let file_medatada = file.metadata();
-
-            if let Ok(file_medatada) = file_medatada {
-                if file_medatada.is_symlink() {
-                    // Check
-                    println!("{}", file.path().display().to_string().truecolor(255, 0, 0));
-                }
-                if file_medatada.is_file() {
-                    // Check
-                    println!("{}", file.path().display().to_string().truecolor(0, 255, 0));
-                }
-                if file_medatada.is_dir() {
-                    // Check
-                    println!(
-                        "{}",
-                        file.path().display().to_string().truecolor(210, 168, 255)
-                    );
-                }
-            }
-        }
-    }
 }
 
 fn is_hidden(entry: &DirEntry) -> bool {
@@ -72,4 +47,11 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| s.starts_with("."))
         .unwrap_or(false)
+}
+
+fn read_entry(file: DirEntry, config: &Config) {
+    if is_hidden(&file) && !config.all {
+        return;
+    }
+    print!("{}\t", file.file_name().to_str().unwrap());
 }
